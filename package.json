@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "name": "ie-touch",
+  "description": "W3C Touch Events for IE10 and IE11 Mobile",
+  "homepage": "https://github.com/WebReflection/ie-touch",
+  "keywords": [
+    "event",
+    "touch",
+    "mobile",
+    "IE"
+  ],
+  "author": {
+    "name": "Andrea Giammarchi",
+    "web": "http://webreflection.blogspot.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/WebReflection/ie-touch.git"
+  },
+  "main": "./ie-touch.js"
+}

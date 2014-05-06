@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IE Touch Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+    <style>
+    html {
+      -ms-touch-action: none;
+    }
+    * {
+      padding: 0;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    div {
+      position: absolute;
+      top: 60px;
+      left: 60px;
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      overflow: hidden;
+      background-color: #000;
+      color: #FFF;
+      text-align: center;
+    }
+    </style>
+    <script>
+    document.write('<script src="ietouches.js?_=' + Math.random() + '"><' + '/script>');
+    </script>
+    <script>
+    this.onload = function () {
+      var
+        handler = {
+          handleEvent: function (e) {
+            this[e.type](e);
+          },
+          touchstart: function (e) {
+            var div = e.currentTarget,
+                touch = e.touches[0];
+            e.preventDefault();
+            e.currentTarget.textContent = 'start';
+            this.diffY = touch.pageY - parseFloat(div.style.top || 60);
+            this.diffX = touch.pageX - parseFloat(div.style.left || 60);
+          },
+          touchmove: function (e) {
+            var div = e.currentTarget,
+                touch = e.touches[0];
+            e.preventDefault();
+            div.textContent = 'move';
+            div.style.top = (touch.pageY - this.diffY) + 'px';
+            div.style.left = (touch.pageX - this.diffX) + 'px';
+          },
+          touchend: function (e) {
+            e.preventDefault();
+            e.currentTarget.textContent = 'end';
+          },
+          touchcancel: function (e) {
+            e.preventDefault();
+            e.currentTarget.textContent = 'cancel';
+          }
+        }
+      ;
+      Object.keys(handler).forEach(function (key) {
+        this.addEventListener(key, handler);
+      }, document.querySelector('div'));
+    };
+    </script>
+  </head>
+  <body><div></div></body>
+</html>
