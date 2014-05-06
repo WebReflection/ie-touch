@@ -51,14 +51,19 @@ JS
   var
     // IE10 and IE11 have different names
     TYPE_MOUSE = (pointerEnabled ? '' : 'MS') + 'POINTER_TYPE_MOUSE',
+    // shortcuts
+    ADD_EVENT_LISTENER = 'addEventListener',
+    REMOVE_EVENT_LISTENER = 'removeEventListener',
+    // shortcut for common replacements
+    ElementPrototype = Element.prototype,
+    defineProperties = Object.defineProperties,
+    defineProperty = Object.defineProperty,
     // for types too
     type = function (type) {
-      return pointerEnabled ? type.toLowerCase() : 'MS' + type;
-    },
-    // while here a shortcut
-    addListener = function (where, how, which) {
-      // intercept all the pointer events
-      how.call(where, type(which), handler, true);
+      var lo = type.toLowerCase(),
+          ms = 'MS' + type;
+      handler[ms] = handler[lo];
+      return pointerEnabled ? lo: ms;
     },
     // these are calls to the passed event
     commonMethod = function (name) {
@@ -69,18 +74,38 @@ JS
         }
       };
     },
+    // DOM Level 0 accessors
+    createAccessor = function (type) {
+      var ontype = '_on' + type;
+      return {
+        enumerable: true,
+        configurable: true,
+        get: function () {
+          return this[ontype] || null;
+        },
+        set: function (callback) {
+          if (this[ontype]) {
+            this[REMOVE_EVENT_LISTENER](type, this[ontype]);
+          }
+          this[ontype] = callback;
+          if (callback) {
+            this[ADD_EVENT_LISTENER](type, callback);
+          }
+        }
+      };
+    },
     // these are common DOM overrides
     commonOverride = function (proto, name) {
       var original = proto[name];
-      Object.defineProperty(proto, name, {
+      defineProperty(proto, name, {
         configurable: true,
         value: function (type, eventHandler, capture) {
           if (type in types) {
             original.call(
               type === 'touchstart' ?
-                this : this.ownerDocument,
+                this : document,
               types[type],
-              handler,
+              handleEvent,
               capture
             );
           }
@@ -112,7 +137,7 @@ JS
       c.initEvent(type, true, true);
       _.value = e;
       TouchEventProperties.currentTarget.value = touch.currentTarget;
-      Object.defineProperties(c, TouchEventProperties);
+      defineProperties(c, TouchEventProperties);
       touch.currentTarget.dispatchEvent(c);
     },
     get = function (name, object) {
@@ -121,7 +146,7 @@ JS
       }
       return function get() {
         _.value = Object.keys(object).map(returnID);
-        return Object.defineProperty(this, name, _)[name];
+        return defineProperty(this, name, _)[name];
       };
     },
     // basically says if it's touch or not
@@ -173,19 +198,15 @@ JS
     },
     // all types translated
     types = Object.create(null),
+    // boosted up eventListener
+    handleEvent = function (e) {
+      if (humanReadablePointerType(e) === 'touch') {
+        // invoke normalized methods
+        handler[e.type](e);
+      }
+    },
     // the unique handler for all the things
     handler = {
-      _t: 0,
-      handleEvent: function (e) {
-        // when an event occurres
-        if (humanReadablePointerType(e) === 'touch') {
-          // invoke normalized methods
-          handler[pointerEnabled ?
-            e.type :
-            e.type.slice(2).toLowerCase()
-          ](e);
-        }
-      },
       pointerdown: function (e) {
         var touch = new Touch(e),
             pointerId = e.pointerId;
@@ -201,6 +222,12 @@ JS
       },
       pointerup: upOrCancel('touchend'),
       pointercancel: upOrCancel('touchcancel')
+    },
+    accessors = {
+      ontouchstart: createAccessor('touchstart'),
+      ontouchmove: createAccessor('touchmove'),
+      ontouchend: createAccessor('touchend'),
+      ontouchcancel: createAccessor('touchcancel')
     }
   ;
 
@@ -213,7 +240,7 @@ JS
   }
 
   // all common properties
-  Object.defineProperties(
+  defineProperties(
     Touch.prototype,
     {
       identifier: commonProperty('pointerId'),
@@ -232,15 +259,13 @@ JS
   types.touchend    = type('PointerUp');
   types.touchcancel = type('PointerCancel');
 
-  commonOverride(document, 'addEventListener');
-  commonOverride(document, 'removeEventListener');
-  commonOverride(Element.prototype, 'addEventListener');
-  commonOverride(Element.prototype, 'removeEventListener');
+  commonOverride(document, ADD_EVENT_LISTENER);
+  commonOverride(document, REMOVE_EVENT_LISTENER);
+  commonOverride(ElementPrototype, ADD_EVENT_LISTENER);
+  commonOverride(ElementPrototype, REMOVE_EVENT_LISTENER);
 
-  // mark these as available
-  document.ontouchstart =
-  document.ontouchmove =
-  document.ontouchend =
-  document.ontouchcancel = null;
+  // make these available as DOM Level 0
+  defineProperties(document, accessors);
+  defineProperties(ElementPrototype, accessors);
 
 }(navigator, document));
