@@ -1,40 +1,9 @@
 <!DOCTYPE html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Ie-touch : W3C Touch Events for IE10 and IE11 Mobile" />
-
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Ie-touch</title>
-  </head>
-
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/WebReflection/ie-touch">View on GitHub</a>
-
-          <h1 id="project_title">Ie-touch</h1>
-          <h2 id="project_tagline">W3C Touch Events for IE10 and IE11 Mobile</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/WebReflection/ie-touch/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/WebReflection/ie-touch/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <p>&lt;!DOCTYPE html&gt;
-
-  </p>
-    IE Touch Test
+    <title>IE Touch Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+    <style>
     html {
       -ms-touch-action: none;
     }
@@ -55,20 +24,48 @@
       color: #FFF;
       text-align: center;
     }
-    <div></div>
-
-      </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Ie-touch maintained by <a href="https://github.com/WebReflection">WebReflection</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-    
-
-  </body>
+    </style>
+    <script>
+    document.write('<script src="ietouches.js?_=' + Math.random() + '"><' + '/script>');
+    </script>
+    <script>
+    this.onload = function () {
+      var
+        handler = {
+          handleEvent: function (e) {
+            this[e.type](e);
+          },
+          touchstart: function (e) {
+            var div = e.currentTarget,
+                touch = e.touches[0];
+            e.preventDefault();
+            e.currentTarget.textContent = 'start';
+            this.diffY = touch.pageY - parseFloat(div.style.top || 60);
+            this.diffX = touch.pageX - parseFloat(div.style.left || 60);
+          },
+          touchmove: function (e) {
+            var div = e.currentTarget,
+                touch = e.touches[0];
+            e.preventDefault();
+            div.textContent = 'move';
+            div.style.top = (touch.pageY - this.diffY) + 'px';
+            div.style.left = (touch.pageX - this.diffX) + 'px';
+          },
+          touchend: function (e) {
+            e.preventDefault();
+            e.currentTarget.textContent = 'end';
+          },
+          touchcancel: function (e) {
+            e.preventDefault();
+            e.currentTarget.textContent = 'cancel';
+          }
+        }
+      ;
+      Object.keys(handler).forEach(function (key) {
+        this.addEventListener(key, handler);
+      }, document.querySelector('div'));
+    };
+    </script>
+  </head>
+  <body><div></div></body>
 </html>
