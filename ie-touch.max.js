@@ -157,10 +157,6 @@ JS
         pointerType === 'mouse'
       ) ? 'mouse' : 'touch'; // right now pen is fine as touch
     },
-    // silly method for the TouchList nobody uses anyway
-    item = function (i) {
-      return this[i];
-    },
     // recycle common descriptors too
     _ = {value: null},
 
