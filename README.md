@@ -1,7 +1,7 @@
 ie-touch
 ========
 
-W3C Touch Events for IE10 and IE11 Mobile
+W3C Touch Events for IE10 and IE11 Mobile (prior to WP 8.1 Update)
 
   * [live test here](http://webreflection.github.io/ie-touch/)
   * [multi touch tesla test here](http://webreflection.github.io/ie-touch/tesla/)
@@ -12,6 +12,8 @@ MIT Style License
 ### How To
 
 Just include [this file](ie-touch.js) on top of your header, **before every other script** you might have in your page.
+
+Please note this file will not compromise any other browser, including latest IE11, that has native support for Touch Events.
 
 
 ### CSS
