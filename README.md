@@ -9,6 +9,10 @@ W3C Touch Events for IE10 and IE11 Mobile
 
 MIT Style License
 
+### How To
+
+Just include this file on top of your header, **before every other script** you might have in your page.
+
 
 ### CSS
 
