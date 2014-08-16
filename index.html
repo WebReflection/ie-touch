@@ -4,8 +4,11 @@
     <title>IE Touch Test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
     <style>
+    /* neded to avoid fat fingers tapping outside DIV
+      and to avoid browser scrolling instead */
     html {
       -ms-touch-action: none;
+      touch-action: none;
     }
     * {
       padding: 0;
