@@ -28,6 +28,7 @@ CSS
   Disables all pan/zoom behaviors and fire pointer events in JavaScript instead.
   .disablePanZoom {
     -ms-touch-action: none;
+    touch-action: none;
   }
 
 JS
@@ -49,11 +50,14 @@ JS
   ) return;
 
   var
-    // IE10 and IE11 have different names
-    TYPE_MOUSE = (pointerEnabled ? '' : 'MS') + 'POINTER_TYPE_MOUSE',
     // shortcuts
     ADD_EVENT_LISTENER = 'addEventListener',
     REMOVE_EVENT_LISTENER = 'removeEventListener',
+    // used to force-simulate touch
+    SET_CURRENT_CAPTURE = pointerEnabled ?
+        'setPointerCapture' : 'msSetPointerCapture',
+    RELEASE_CURRENT_CAPTURE = pointerEnabled ?
+        'releasePointerCapture' : 'msReleasePointerCapture',
     // shortcut for common replacements
     ElementPrototype = Element.prototype,
     defineProperties = Object.defineProperties,
@@ -102,8 +106,7 @@ JS
         value: function (type, eventHandler, capture) {
           if (type in types) {
             original.call(
-              type === 'touchstart' ?
-                this : document,
+              this,
               types[type],
               handleEvent,
               capture
@@ -125,8 +128,12 @@ JS
     upOrCancel = function (type) {
       return function (e) {
         var pointerId = e.pointerId,
-            touch = touches[pointerId];
+            touch = touches[pointerId],
+            currentTarget = e.currentTarget;
         delete touches[pointerId];
+        if (RELEASE_CURRENT_CAPTURE in currentTarget) {
+          currentTarget[RELEASE_CURRENT_CAPTURE](e.pointerId);
+        }
         dispatchEvent(type, e, touch);
         delete changedTouches[pointerId];
       };
@@ -151,11 +158,13 @@ JS
     },
     // basically says if it's touch or not
     humanReadablePointerType = function (e) {
-      var pointerType = e.pointerType;
-      return (
-        pointerType === e[TYPE_MOUSE] ||
-        pointerType === 'mouse'
-      ) ? 'mouse' : 'touch'; // right now pen is fine as touch
+      switch(e.pointerType) {
+        case 'mouse':
+        case e.MSPOINTER_TYPE_MOUSE:
+          return 'mouse';
+      }
+      // pen is just fine as touch
+      return 'touch';
     },
     // recycle common descriptors too
     _ = {value: null},
@@ -205,8 +214,12 @@ JS
     handler = {
       pointerdown: function (e) {
         var touch = new Touch(e),
-            pointerId = e.pointerId;
+            pointerId = e.pointerId,
+            currentTarget = e.currentTarget;
         changedTouches[pointerId] = touches[pointerId] = touch;
+        if (SET_CURRENT_CAPTURE in currentTarget) {
+          currentTarget[SET_CURRENT_CAPTURE](e.pointerId);
+        }
         dispatchEvent('touchstart', e, touch);
       },
       pointermove: function (e) {
